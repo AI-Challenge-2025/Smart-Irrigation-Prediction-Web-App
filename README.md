@@ -50,6 +50,7 @@ pip install -r requirements.txt
 ```bash
 streamlit run Webapp.py
 ```
+หรือ
 ```
 python -m streamlit run WebApp.py
 ```
