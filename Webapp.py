@@ -1,3 +1,4 @@
+from sklearn.metrics import accuracy_score
 import streamlit as st
 import pandas as pd
 import joblib
@@ -28,8 +29,11 @@ if uploaded_file:
         input_df = pd.read_csv(uploaded_file)
         st.success("✅ อัปโหลดไฟล์เรียบร้อยแล้ว!")
 
-        # ตรวจสอบว่ามีคอลัมน์ 'Status' หรือไม่ และลบทิ้ง
+        # ตรวจสอบว่ามี 'Status' หรือไม่ → เตรียมวัด Accuracy
+        has_true_label = False
         if 'Status' in input_df.columns:
+            has_true_label = True
+            true_labels = input_df['Status']
             input_df = input_df.drop('Status', axis=1)
 
         # ทำนายผล
@@ -43,6 +47,13 @@ if uploaded_file:
         # แสดงผลลัพธ์ในตาราง
         st.subheader("🔍 ผลการทำนาย")
         st.dataframe(result_df, use_container_width=True)
+
+        # หากมี Ground Truth → แปลง label แล้วคำนวณ Accuracy
+        if has_true_label:
+            if true_labels.dtype == object:
+                true_labels = true_labels.apply(lambda x: 1 if str(x).strip().upper() == 'ON' else 0)
+            acc = accuracy_score(true_labels, predictions)
+            st.success(f"✅ Accuracy จากข้อมูลที่ให้มา: {acc:.4f}")
 
         # ดาวน์โหลดผลลัพธ์
         csv_download = result_df.to_csv(index=False).encode('utf-8')
